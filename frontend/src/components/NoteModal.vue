@@ -46,7 +46,9 @@ watch(
 );
 
 watch(title, () => {
-  if (error.value) {
+  if (error.value === 'Title is mandatory.' && title.value.trim()) {
+    error.value = '';
+  } else if (error.value === 'Title cannot exceed 255 characters.' && title.value.trim().length <= 255) {
     error.value = '';
   }
 });
@@ -95,11 +97,11 @@ const handleSubmit = () => {
 
       <template v-if="mode === 'view'">
         <div class="space-y-3 py-1">
-          <h2 class="text-2xl font-bold tracking-tight text-slate-900 leading-snug">
+          <h2 class="text-2xl font-bold tracking-tight text-slate-900 leading-snug break-words [overflow-wrap:anywhere]">
             {{ title }}
           </h2>
 
-          <div class="text-slate-700 text-base leading-relaxed whitespace-pre-wrap min-h-[120px] pt-1">
+          <div class="text-slate-700 text-base leading-relaxed whitespace-pre-wrap break-words [overflow-wrap:anywhere] min-h-[120px] pt-1">
             {{ content || 'No content written for this note.' }}
           </div>
         </div>
@@ -114,7 +116,6 @@ const handleSubmit = () => {
             <input
               v-model="title"
               type="text"
-              maxlength="255"
               placeholder="e.g. Project Roadmap or Meeting Notes"
               class="flex h-11 w-full rounded-xl border bg-slate-50/60 px-3.5 py-1 text-base text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none transition-colors"
               :class="error ? 'border-red-500 focus:border-red-600 focus:ring-1 focus:ring-red-600' : 'border-slate-200 focus:border-blue-600 focus:ring-1 focus:ring-blue-600'"

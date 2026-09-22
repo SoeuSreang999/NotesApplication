@@ -38,7 +38,7 @@ const emit = defineEmits<{
         </div>
       </div>
 
-      <div class="rounded-xl border border-slate-200/80 bg-slate-50/70 p-4 text-sm sm:text-base text-slate-700">
+      <div class="rounded-xl border border-slate-200/80 bg-slate-50/70 p-4 text-sm sm:text-base text-slate-700 break-words [overflow-wrap:anywhere]">
         Are you sure you want to delete <span class="font-bold text-slate-900">"{{ title }}"</span>?
       </div>
 

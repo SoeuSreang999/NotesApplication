@@ -93,13 +93,13 @@ const formattedCreated = computed(() => {
   >
     <div>
       <h3
-        class="font-bold text-slate-900 text-lg leading-snug hover:text-blue-600 cursor-pointer transition-colors line-clamp-2 mb-2"
+        class="font-bold text-slate-900 text-lg leading-snug hover:text-blue-600 cursor-pointer transition-colors line-clamp-2 mb-2 break-words [overflow-wrap:anywhere]"
       >
         {{ note.title }}
       </h3>
 
       <p
-        class="text-slate-500 text-sm sm:text-[15px] leading-relaxed line-clamp-4 cursor-pointer whitespace-pre-line mb-5"
+        class="text-slate-500 text-sm sm:text-[15px] leading-relaxed line-clamp-4 cursor-pointer whitespace-pre-line mb-5 break-words [overflow-wrap:anywhere]"
       >
         {{ note.content || 'No content provided.' }}
       </p>
