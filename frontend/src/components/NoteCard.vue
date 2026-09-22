@@ -62,21 +62,21 @@ const formattedCreated = computed(() => {
 
       <div class="flex items-center gap-1">
         <button
-          @click="emit('view', note)"
+          @click.stop="emit('view', note)"
           title="View Note"
           class="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
         >
           <Eye class="w-4 h-4" />
         </button>
         <button
-          @click="emit('edit', note)"
+          @click.stop="emit('edit', note)"
           title="Edit Note"
           class="p-1.5 text-slate-500 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors cursor-pointer"
         >
           <Edit3 class="w-4 h-4" />
         </button>
         <button
-          @click="emit('delete', note)"
+          @click.stop="emit('delete', note)"
           title="Delete Note"
           class="p-1.5 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
         >
@@ -88,7 +88,8 @@ const formattedCreated = computed(() => {
 
   <div
     v-else
-    @click="emit('view', note)" class="group relative bg-white border border-slate-200/90 rounded-2xl p-5 flex flex-col justify-between transition-all duration-200 hover:shadow-lg hover:border-blue-400 hover:-translate-y-0.5"
+    @click="emit('view', note)"
+    class="group relative bg-white border border-slate-200/90 rounded-2xl p-5 flex flex-col justify-between transition-all duration-200 hover:shadow-lg hover:border-blue-400 hover:-translate-y-0.5"
   >
     <div>
       <h3
@@ -104,7 +105,10 @@ const formattedCreated = computed(() => {
       </p>
     </div>
 
-    <div class="pt-3.5 border-t border-slate-100 flex items-center justify-between gap-2 mt-auto">
+    <div
+      @click.stop
+      class="pt-3.5 border-t border-slate-100 flex items-center justify-between gap-2 mt-auto"
+    >
       <div class="flex items-center gap-1.5 text-xs text-slate-400">
         <Clock class="w-3.5 h-3.5 text-slate-400" />
         <span>{{ formattedCreated }}</span>
@@ -112,20 +116,21 @@ const formattedCreated = computed(() => {
 
       <div class="flex items-center gap-1">
         <button
+          @click.stop="emit('view', note)"
           title="View Details"
           class="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
         >
           <Eye class="w-4 h-4" />
         </button>
         <button
-          @click="emit('edit', note)"
+          @click.stop="emit('edit', note)"
           title="Edit Note"
           class="p-1.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors cursor-pointer"
         >
           <Edit3 class="w-4 h-4" />
         </button>
         <button
-          @click="emit('delete', note)"
+          @click.stop="emit('delete', note)"
           title="Delete Note"
           class="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
         >

@@ -101,6 +101,7 @@ const openCreateModal = () => {
 };
 
 const handleViewNote = (note: Note) => {
+  isDeleteModalOpen.value = false;
   currentNote.value = note;
   noteModalMode.value = 'view';
   modalError.value = null;
@@ -108,6 +109,7 @@ const handleViewNote = (note: Note) => {
 };
 
 const handleEditNote = (note: Note) => {
+  isDeleteModalOpen.value = false;
   currentNote.value = note;
   noteModalMode.value = 'edit';
   modalError.value = null;
@@ -134,6 +136,7 @@ const handleNoteSubmit = async (data: { title: string; content: string }) => {
 };
 
 const handleDeletePrompt = (note: Note) => {
+  isNoteModalOpen.value = false;
   noteToDelete.value = note;
   isDeleteModalOpen.value = true;
 };
