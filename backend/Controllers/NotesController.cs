@@ -131,6 +131,11 @@ public class NotesController : ControllerBase
             return BadRequest(new { message = "Title is mandatory." });
         }
 
+        if (req.Title.Trim().Length > 255)
+        {
+            return BadRequest(new { message = "Title cannot exceed 255 characters." });
+        }
+
         try
         {
             var userId = GetCurrentUserId();
@@ -161,6 +166,11 @@ public class NotesController : ControllerBase
         if (string.IsNullOrWhiteSpace(req.Title))
         {
             return BadRequest(new { message = "Title is mandatory." });
+        }
+
+        if (req.Title.Trim().Length > 255)
+        {
+            return BadRequest(new { message = "Title cannot exceed 255 characters." });
         }
 
         try

@@ -14,22 +14,38 @@ const confirmPassword = ref('');
 const localError = ref('');
 
 const handleRegister = async () => {
-  if (!username.value.trim() || !email.value.trim() || !password.value) {
+  const trimmedUsername = username.value.trim();
+  const trimmedEmail = email.value.trim();
+
+  if (!trimmedUsername || !trimmedEmail || !password.value) {
     localError.value = 'Please fill in all required fields.';
+    return;
+  }
+  if (trimmedUsername.length < 3 || trimmedUsername.length > 15) {
+    localError.value = 'Username must be between 3 and 15 characters.';
+    return;
+  }
+  if (trimmedEmail.length > 50) {
+    localError.value = 'Email cannot exceed 50 characters.';
+    return;
+  }
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(trimmedEmail)) {
+    localError.value = 'Please enter a valid email address.';
+    return;
+  }
+  if (password.value.length < 6 || password.value.length > 100) {
+    localError.value = 'Password must be between 6 and 100 characters.';
     return;
   }
   if (password.value !== confirmPassword.value) {
     localError.value = 'Passwords do not match.';
     return;
   }
-  if (password.value.length < 6) {
-    localError.value = 'Password must be at least 6 characters.';
-    return;
-  }
   localError.value = '';
 
   try {
-    await authStore.register(username.value.trim(), email.value.trim(), password.value);
+    await authStore.register(trimmedUsername, trimmedEmail, password.value);
     router.push('/');
   } catch (err: any) {
     localError.value = err.message || 'Registration failed';
@@ -75,6 +91,7 @@ const handleRegister = async () => {
               <input
                 v-model="username"
                 type="text"
+                maxlength="15"
                 required
                 placeholder="e.g. sreang"
                 class="flex h-10 w-full rounded-xl border border-slate-200 bg-slate-50/60 pl-9 pr-3.5 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition-colors"
@@ -91,6 +108,7 @@ const handleRegister = async () => {
               <input
                 v-model="email"
                 type="email"
+                maxlength="50"
                 required
                 placeholder="sreang@example.com"
                 class="flex h-10 w-full rounded-xl border border-slate-200 bg-slate-50/60 pl-9 pr-3.5 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition-colors"
@@ -107,6 +125,7 @@ const handleRegister = async () => {
               <input
                 v-model="password"
                 type="password"
+                maxlength="100"
                 required
                 placeholder="At least 6 characters"
                 class="flex h-10 w-full rounded-xl border border-slate-200 bg-slate-50/60 pl-9 pr-3.5 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition-colors"
@@ -123,6 +142,7 @@ const handleRegister = async () => {
               <input
                 v-model="confirmPassword"
                 type="password"
+                maxlength="100"
                 required
                 placeholder="Repeat password"
                 class="flex h-10 w-full rounded-xl border border-slate-200 bg-slate-50/60 pl-9 pr-3.5 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition-colors"

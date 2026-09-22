@@ -1,8 +1,20 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace NotesApplication.DTOs;
 
-public record CreateNoteRequest(string Title, string? Content);
+public record CreateNoteRequest(
+    [Required(ErrorMessage = "Title is mandatory.")]
+    [StringLength(255, ErrorMessage = "Title cannot exceed 255 characters.")]
+    string Title, 
+    string? Content
+);
 
-public record UpdateNoteRequest(string Title, string? Content);
+public record UpdateNoteRequest(
+    [Required(ErrorMessage = "Title is mandatory.")]
+    [StringLength(255, ErrorMessage = "Title cannot exceed 255 characters.")]
+    string Title, 
+    string? Content
+);
 
 public class NoteDto
 {

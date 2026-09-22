@@ -66,18 +66,45 @@ public class UsersController : ControllerBase
                 return Unauthorized();
             }
 
-            if (string.IsNullOrWhiteSpace(req.Username) && string.IsNullOrWhiteSpace(req.Password))
+            if (string.IsNullOrWhiteSpace(req.Username) && string.IsNullOrWhiteSpace(req.Password) && string.IsNullOrWhiteSpace(req.Email))
             {
-                return BadRequest(new { message = "Username or password must be provided." });
+                return BadRequest(new { message = "Username, email, or password must be provided." });
             }
 
             if (!string.IsNullOrWhiteSpace(req.Username))
             {
+                var trimmedUsername = req.Username.Trim();
+                if (trimmedUsername.Length < 3 || trimmedUsername.Length > 15)
+                {
+                    return BadRequest(new { message = "Username must be between 3 and 15 characters." });
+                }
+
                 const string checkSql = "SELECT COUNT(1) FROM Users WHERE username = @Username AND id != @UserId";
-                var exists = await _db.ExecuteScalarAsync<int>(checkSql, new { Username = req.Username.Trim(), UserId = userId });
+                var exists = await _db.ExecuteScalarAsync<int>(checkSql, new { Username = trimmedUsername, UserId = userId });
                 if (exists > 0)
                 {
                     return Conflict(new { message = "Username is already taken." });
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(req.Email))
+            {
+                var trimmedEmail = req.Email.Trim();
+                if (trimmedEmail.Length > 50)
+                {
+                    return BadRequest(new { message = "Email cannot exceed 50 characters." });
+                }
+
+                if (!new System.ComponentModel.DataAnnotations.EmailAddressAttribute().IsValid(trimmedEmail))
+                {
+                    return BadRequest(new { message = "Invalid email address format." });
+                }
+
+                const string checkEmailSql = "SELECT COUNT(1) FROM Users WHERE email = @Email AND id != @UserId";
+                var exists = await _db.ExecuteScalarAsync<int>(checkEmailSql, new { Email = trimmedEmail, UserId = userId });
+                if (exists > 0)
+                {
+                    return Conflict(new { message = "Email is already taken." });
                 }
             }
 
@@ -92,11 +119,17 @@ public class UsersController : ControllerBase
                 parameters.Add("Username", req.Username.Trim());
             }
 
+            if (!string.IsNullOrWhiteSpace(req.Email))
+            {
+                setClauses.Add("email = @Email");
+                parameters.Add("Email", req.Email.Trim());
+            }
+
             if (!string.IsNullOrWhiteSpace(req.Password))
             {
-                if (req.Password.Length < 6)
+                if (req.Password.Length < 6 || req.Password.Length > 100)
                 {
-                    return BadRequest(new { message = "Password must be at least 6 characters." });
+                    return BadRequest(new { message = "Password must be between 6 and 100 characters." });
                 }
                 var hash = BCrypt.Net.BCrypt.HashPassword(req.Password);
                 setClauses.Add("password_hash = @PasswordHash");

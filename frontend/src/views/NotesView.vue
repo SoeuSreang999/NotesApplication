@@ -91,29 +91,36 @@ onUnmounted(() => {
   document.removeEventListener('click', handleSortClickOutside);
 });
 
+const modalError = ref<string | null>(null);
+
 const openCreateModal = () => {
   noteModalMode.value = 'create';
   currentNote.value = null;
+  modalError.value = null;
   isNoteModalOpen.value = true;
 };
 
 const handleViewNote = (note: Note) => {
   currentNote.value = note;
   noteModalMode.value = 'view';
+  modalError.value = null;
   isNoteModalOpen.value = true;
 };
 
 const handleEditNote = (note: Note) => {
   currentNote.value = note;
   noteModalMode.value = 'edit';
+  modalError.value = null;
   isNoteModalOpen.value = true;
 };
 
 const handleSwitchToEdit = () => {
+  modalError.value = null;
   noteModalMode.value = 'edit';
 };
 
 const handleNoteSubmit = async (data: { title: string; content: string }) => {
+  modalError.value = null;
   try {
     if (noteModalMode.value === 'create') {
       await notesStore.createNote(data);
@@ -121,8 +128,8 @@ const handleNoteSubmit = async (data: { title: string; content: string }) => {
       await notesStore.updateNote(currentNote.value.id, data);
     }
     isNoteModalOpen.value = false;
-  } catch (err) {
-    
+  } catch (err: any) {
+    modalError.value = err.message || 'Operation failed';
   }
 };
 
@@ -300,6 +307,7 @@ const handleConfirmDelete = async () => {
       :mode="noteModalMode"
       :note="currentNote"
       :loading="notesStore.loading"
+      :error-message="modalError"
       @close="isNoteModalOpen = false"
       @submit="handleNoteSubmit"
       @switch-to-edit="handleSwitchToEdit"

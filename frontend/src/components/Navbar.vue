@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, watch, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
 import { LogOut, ChevronDown, User, Mail, Calendar, X, Edit3, Check } from 'lucide-vue-next';
@@ -11,11 +11,45 @@ const isDropdownOpen = ref(false);
 const isProfileModalOpen = ref(false);
 const isEditingProfile = ref(false);
 const editUsername = ref('');
+const editEmail = ref('');
 const editPassword = ref('');
 const editConfirmPassword = ref('');
-const profileError = ref<string | null>(null);
+
+const usernameError = ref('');
+const emailError = ref('');
+const passwordError = ref('');
+const confirmPasswordError = ref('');
+const generalError = ref('');
 const profileSuccess = ref<string | null>(null);
 const dropdownRef = ref<HTMLElement | null>(null);
+
+const clearErrors = () => {
+  usernameError.value = '';
+  emailError.value = '';
+  passwordError.value = '';
+  confirmPasswordError.value = '';
+  generalError.value = '';
+};
+
+watch(editUsername, () => {
+  usernameError.value = '';
+  generalError.value = '';
+});
+
+watch(editEmail, () => {
+  emailError.value = '';
+  generalError.value = '';
+});
+
+watch(editPassword, () => {
+  passwordError.value = '';
+  generalError.value = '';
+});
+
+watch(editConfirmPassword, () => {
+  confirmPasswordError.value = '';
+  generalError.value = '';
+});
 
 const toggleDropdown = () => {
   isDropdownOpen.value = !isDropdownOpen.value;
@@ -28,9 +62,10 @@ const closeDropdown = () => {
 const openProfile = () => {
   closeDropdown();
   isEditingProfile.value = false;
-  profileError.value = null;
+  clearErrors();
   profileSuccess.value = null;
   editUsername.value = authStore.user?.username || '';
+  editEmail.value = authStore.user?.email || '';
   editPassword.value = '';
   editConfirmPassword.value = '';
   isProfileModalOpen.value = true;
@@ -38,39 +73,68 @@ const openProfile = () => {
 
 const startEditProfile = () => {
   isEditingProfile.value = true;
-  profileError.value = null;
+  clearErrors();
   profileSuccess.value = null;
   editUsername.value = authStore.user?.username || '';
+  editEmail.value = authStore.user?.email || '';
   editPassword.value = '';
   editConfirmPassword.value = '';
 };
 
 const cancelEditProfile = () => {
   isEditingProfile.value = false;
-  profileError.value = null;
+  clearErrors();
   profileSuccess.value = null;
+  editPassword.value = '';
   editConfirmPassword.value = '';
 };
 
 const handleSaveProfile = async () => {
-  if (!editUsername.value.trim()) {
-    profileError.value = 'Username cannot be empty.';
+  clearErrors();
+  const trimmedUsername = editUsername.value.trim();
+  const trimmedEmail = editEmail.value.trim();
+  let hasError = false;
+
+  if (!trimmedUsername) {
+    usernameError.value = 'Username cannot be empty.';
+    hasError = true;
+  } else if (trimmedUsername.length < 3 || trimmedUsername.length > 15) {
+    usernameError.value = 'Username must be between 3 and 15 characters.';
+    hasError = true;
+  }
+
+  if (!trimmedEmail) {
+    emailError.value = 'Email cannot be empty.';
+    hasError = true;
+  } else if (trimmedEmail.length > 50) {
+    emailError.value = 'Email cannot exceed 50 characters.';
+    hasError = true;
+  } else {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(trimmedEmail)) {
+      emailError.value = 'Please enter a valid email address.';
+      hasError = true;
+    }
+  }
+
+  if (editPassword.value) {
+    if (editPassword.value.length < 6 || editPassword.value.length > 100) {
+      passwordError.value = 'Password must be between 6 and 100 characters.';
+      hasError = true;
+    } else if (editPassword.value !== editConfirmPassword.value) {
+      confirmPasswordError.value = 'Passwords do not match.';
+      hasError = true;
+    }
+  }
+
+  if (hasError) {
     return;
   }
-  if (editPassword.value) {
-    if (editPassword.value.length < 6) {
-      profileError.value = 'Password must be at least 6 characters.';
-      return;
-    }
-    if (editPassword.value !== editConfirmPassword.value) {
-      profileError.value = 'Passwords do not match.';
-      return;
-    }
-  }
-  profileError.value = null;
+
   try {
     await authStore.updateProfile({
-      username: editUsername.value.trim(),
+      username: trimmedUsername,
+      email: trimmedEmail,
       password: editPassword.value ? editPassword.value : undefined,
     });
     profileSuccess.value = 'Profile updated successfully!';
@@ -79,7 +143,16 @@ const handleSaveProfile = async () => {
       profileSuccess.value = null;
     }, 1200);
   } catch (err: any) {
-    profileError.value = err.message || 'Failed to update profile.';
+    const msg = err.message || 'Failed to update profile.';
+    if (msg.toLowerCase().includes('username')) {
+      usernameError.value = msg;
+    } else if (msg.toLowerCase().includes('email')) {
+      emailError.value = msg;
+    } else if (msg.toLowerCase().includes('password')) {
+      passwordError.value = msg;
+    } else {
+      generalError.value = msg;
+    }
   }
 };
 
@@ -225,8 +298,8 @@ const formatDate = (iso?: string | null) => {
       </div>
 
       <div v-else class="py-1 space-y-3.5">
-        <div v-if="profileError" class="p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-600 font-medium text-left">
-          {{ profileError }}
+        <div v-if="generalError" class="p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-600 font-medium text-left">
+          {{ generalError }}
         </div>
         <div v-if="profileSuccess" class="p-3 bg-green-50 border border-green-200 rounded-xl text-sm text-green-700 font-medium flex items-center gap-2">
           <Check class="w-4 h-4 text-green-600 shrink-0" />
@@ -240,9 +313,31 @@ const formatDate = (iso?: string | null) => {
           <input
             v-model="editUsername"
             type="text"
+            maxlength="15"
             placeholder="Enter new username"
-            class="flex h-11 w-full rounded-xl border border-slate-200 bg-slate-50/60 px-3.5 py-1 text-base text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition-colors"
+            class="flex h-11 w-full rounded-xl border bg-slate-50/60 px-3.5 py-1 text-base text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none transition-colors"
+            :class="usernameError ? 'border-red-500 focus:border-red-600 focus:ring-1 focus:ring-red-600' : 'border-slate-200 focus:border-blue-600 focus:ring-1 focus:ring-blue-600'"
           />
+          <span v-if="usernameError" class="text-xs text-red-600 font-medium block pt-0.5">
+            {{ usernameError }}
+          </span>
+        </div>
+
+        <div class="space-y-1.5 text-left">
+          <label class="text-sm font-semibold text-slate-700 leading-none">
+            Email <span class="text-red-500">*</span>
+          </label>
+          <input
+            v-model="editEmail"
+            type="email"
+            maxlength="50"
+            placeholder="Enter email address"
+            class="flex h-11 w-full rounded-xl border bg-slate-50/60 px-3.5 py-1 text-base text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none transition-colors"
+            :class="emailError ? 'border-red-500 focus:border-red-600 focus:ring-1 focus:ring-red-600' : 'border-slate-200 focus:border-blue-600 focus:ring-1 focus:ring-blue-600'"
+          />
+          <span v-if="emailError" class="text-xs text-red-600 font-medium block pt-0.5">
+            {{ emailError }}
+          </span>
         </div>
 
         <div class="space-y-1.5 text-left">
@@ -252,9 +347,14 @@ const formatDate = (iso?: string | null) => {
           <input
             v-model="editPassword"
             type="password"
+            maxlength="100"
             placeholder="Leave blank to keep current password"
-            class="flex h-11 w-full rounded-xl border border-slate-200 bg-slate-50/60 px-3.5 py-1 text-base text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition-colors"
+            class="flex h-11 w-full rounded-xl border bg-slate-50/60 px-3.5 py-1 text-base text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none transition-colors"
+            :class="passwordError ? 'border-red-500 focus:border-red-600 focus:ring-1 focus:ring-red-600' : 'border-slate-200 focus:border-blue-600 focus:ring-1 focus:ring-blue-600'"
           />
+          <span v-if="passwordError" class="text-xs text-red-600 font-medium block pt-0.5">
+            {{ passwordError }}
+          </span>
         </div>
 
         <div class="space-y-1.5 text-left">
@@ -264,9 +364,14 @@ const formatDate = (iso?: string | null) => {
           <input
             v-model="editConfirmPassword"
             type="password"
+            maxlength="100"
             placeholder="Confirm new password"
-            class="flex h-11 w-full rounded-xl border border-slate-200 bg-slate-50/60 px-3.5 py-1 text-base text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition-colors"
+            class="flex h-11 w-full rounded-xl border bg-slate-50/60 px-3.5 py-1 text-base text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none transition-colors"
+            :class="confirmPasswordError ? 'border-red-500 focus:border-red-600 focus:ring-1 focus:ring-red-600' : 'border-slate-200 focus:border-blue-600 focus:ring-1 focus:ring-blue-600'"
           />
+          <span v-if="confirmPasswordError" class="text-xs text-red-600 font-medium block pt-0.5">
+            {{ confirmPasswordError }}
+          </span>
         </div>
       </div>
 

@@ -27,7 +27,30 @@ public class AuthController : ControllerBase
 
         if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
         {
-            return BadRequest(new { message = "username, email, and password are required." });
+            return BadRequest(new { message = "Username, email, and password are required." });
+        }
+
+        username = username.Trim();
+        email = email.Trim();
+
+        if (username.Length < 3 || username.Length > 15)
+        {
+            return BadRequest(new { message = "Username must be between 3 and 15 characters." });
+        }
+
+        if (email.Length > 50)
+        {
+            return BadRequest(new { message = "Email cannot exceed 50 characters." });
+        }
+
+        if (!new System.ComponentModel.DataAnnotations.EmailAddressAttribute().IsValid(email))
+        {
+            return BadRequest(new { message = "Invalid email address format." });
+        }
+
+        if (password.Length < 6 || password.Length > 100)
+        {
+            return BadRequest(new { message = "Password must be between 6 and 100 characters." });
         }
 
         try

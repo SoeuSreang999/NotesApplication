@@ -54,7 +54,7 @@ export const useAuthStore = defineStore('auth', () => {
     }
   };
 
-  const updateProfile = async (data: { username?: string; password?: string }) => {
+  const updateProfile = async (data: { username?: string; email?: string; password?: string }) => {
     loading.value = true;
     error.value = null;
     try {

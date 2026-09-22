@@ -8,6 +8,7 @@ const props = defineProps<{
   mode: 'create' | 'edit' | 'view';
   note?: Note | null;
   loading?: boolean;
+  errorMessage?: string | null;
 }>();
 
 const emit = defineEmits<{
@@ -35,14 +36,34 @@ watch(
   { immediate: true }
 );
 
+watch(
+  () => props.errorMessage,
+  (newVal) => {
+    if (newVal) {
+      error.value = newVal;
+    }
+  }
+);
+
+watch(title, () => {
+  if (error.value) {
+    error.value = '';
+  }
+});
+
 const handleSubmit = () => {
-  if (!title.value.trim()) {
+  const trimmedTitle = title.value.trim();
+  if (!trimmedTitle) {
     error.value = 'Title is mandatory.';
+    return;
+  }
+  if (trimmedTitle.length > 255) {
+    error.value = 'Title cannot exceed 255 characters.';
     return;
   }
   error.value = '';
   emit('submit', {
-    title: title.value.trim(),
+    title: trimmedTitle,
     content: content.value.trim(),
   });
 };
@@ -72,13 +93,6 @@ const handleSubmit = () => {
         </h3>
       </div>
 
-      <div
-        v-if="error"
-        class="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700 font-medium"
-      >
-        {{ error }}
-      </div>
-
       <template v-if="mode === 'view'">
         <div class="space-y-3 py-1">
           <h2 class="text-2xl font-bold tracking-tight text-slate-900 leading-snug">
@@ -100,10 +114,15 @@ const handleSubmit = () => {
             <input
               v-model="title"
               type="text"
+              maxlength="255"
               placeholder="e.g. Project Roadmap or Meeting Notes"
-              class="flex h-11 w-full rounded-xl border border-slate-200 bg-slate-50/60 px-3.5 py-1 text-base text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition-colors"
+              class="flex h-11 w-full rounded-xl border bg-slate-50/60 px-3.5 py-1 text-base text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none transition-colors"
+              :class="error ? 'border-red-500 focus:border-red-600 focus:ring-1 focus:ring-red-600' : 'border-slate-200 focus:border-blue-600 focus:ring-1 focus:ring-blue-600'"
               autofocus
             />
+            <span v-if="error" class="text-xs text-red-600 font-medium block pt-0.5">
+              {{ error }}
+            </span>
           </div>
 
           <div class="space-y-1.5 text-left">
