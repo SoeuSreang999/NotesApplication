@@ -1,0 +1,30 @@
+@NotesApplication_HostAddress = http://localhost:5130
+
+POST {{NotesApplication_HostAddress}}/api/auth/register
+Content-Type: application/json
+
+{
+  "username": "sreang",
+  "email": "sreang@example.com",
+  "password": "Password123!"
+}
+
+###
+
+POST {{NotesApplication_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "sreang",
+  "password": "Password123!"
+}
+
+###
+
+GET {{NotesApplication_HostAddress}}/api/users
+Accept: application/json
+
+###
+
+GET {{NotesApplication_HostAddress}}/api/users/1
+Accept: application/json
