@@ -134,3 +134,4 @@ E:/wamp/www/NotesApplication/backend/obj/Debug/net10.0/ref/NotesApplication.dll
 /home/sreang/Downloads/NotesApplication/backend/obj/Debug/net10.0/NotesApplication.pdb
 /home/sreang/Downloads/NotesApplication/backend/obj/Debug/net10.0/NotesApplication.genruntimeconfig.cache
 /home/sreang/Downloads/NotesApplication/backend/obj/Debug/net10.0/ref/NotesApplication.dll
+/home/sreang/Downloads/NotesApplication/backend/obj/Debug/net10.0/NotesApplication.sourcelink.json

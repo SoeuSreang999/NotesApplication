@@ -88,18 +88,16 @@ const formattedCreated = computed(() => {
 
   <div
     v-else
-    class="group relative bg-white border border-slate-200/90 rounded-2xl p-5 flex flex-col justify-between transition-all duration-200 hover:shadow-lg hover:border-blue-400 hover:-translate-y-0.5"
+    @click="emit('view', note)" class="group relative bg-white border border-slate-200/90 rounded-2xl p-5 flex flex-col justify-between transition-all duration-200 hover:shadow-lg hover:border-blue-400 hover:-translate-y-0.5"
   >
     <div>
       <h3
-        @click="emit('view', note)"
         class="font-bold text-slate-900 text-lg leading-snug hover:text-blue-600 cursor-pointer transition-colors line-clamp-2 mb-2"
       >
         {{ note.title }}
       </h3>
 
       <p
-        @click="emit('view', note)"
         class="text-slate-500 text-sm sm:text-[15px] leading-relaxed line-clamp-4 cursor-pointer whitespace-pre-line mb-5"
       >
         {{ note.content || 'No content provided.' }}
@@ -114,7 +112,6 @@ const formattedCreated = computed(() => {
 
       <div class="flex items-center gap-1">
         <button
-          @click="emit('view', note)"
           title="View Details"
           class="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
         >
